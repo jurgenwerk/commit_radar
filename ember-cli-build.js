@@ -19,5 +19,9 @@ module.exports = function(defaults) {
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
 
+  app.import("vendor/map/jquery-jvectormap-2.0.4.css");
+  app.import("vendor/map/jquery-jvectormap-2.0.4.min.js");
+  app.import("vendor/map/jquery-jvectormap-world-mill.js");
+
   return app.toTree();
 };
