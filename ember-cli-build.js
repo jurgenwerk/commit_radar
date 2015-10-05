@@ -22,6 +22,7 @@ module.exports = function(defaults) {
   app.import("vendor/map/jquery-jvectormap-2.0.4.css");
   app.import("vendor/map/jquery-jvectormap-2.0.4.min.js");
   app.import("vendor/map/jquery-jvectormap-world-mill.js");
+  app.import("vendor/firehose/firehose.js");
 
   return app.toTree();
 };
