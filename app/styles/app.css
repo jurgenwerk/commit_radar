@@ -1,3 +1,7 @@
+body {
+  background: #282C34;
+  color: white;
+}
 #map_area {
   height: 600px;
 }
