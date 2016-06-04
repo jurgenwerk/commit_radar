@@ -6,10 +6,36 @@ export default Ember.Component.extend({
   socketURI: '//localhost:7474/github_broadcast',
   nominatimUrl: "http://nominatim.openstreetmap.org/search",
   dataIndex: 0,
+  markerWidth: 10,
 
   storeLocation(name, latitude, longitude) {
     const url = ENV.serverUrl + "/store_location";
     Ember.$.post(url, { name: name, latitude: latitude, longitude: longitude });
+  },
+
+  spawnCirclePulse(idx, location) {
+    const markerElement = $(`circle[data-index=${idx}]`);
+    const mapOffset = $('.jvectormap-container svg').offset()
+    const x = parseInt(markerElement.attr('cx')) + mapOffset.left - this.markerWidth/2;
+    const y = parseInt(markerElement.attr('cy')) + mapOffset.top - this.markerWidth/2;
+
+    const $circle = $(`<div class="radar-circle"><div class="radar-circle-content">${location}</div></div>`);
+    const circleWidth = 300;
+
+    $circle.css({top: `${y}px`, left: `${x}px`});
+    $circle.animate({
+        'width': `${circleWidth}px`,
+        'height': `${circleWidth}px`,
+        'margin-top': `${-circleWidth/2}px`,
+        'margin-left': `${-circleWidth/2}px`,
+        'background': 'background: rgba(0,0,255,0.1);'
+      }, 2000, 'easeOutCirc');
+
+    $('body').append($circle);
+
+    Em.run.later(() => {
+      $circle.fadeOut(() => $circle.remove());
+    }, 2100);
   },
 
   addMarker(location, lat, lon, storeLocation) {
@@ -22,14 +48,15 @@ export default Ember.Component.extend({
       this.storeLocation(location, lat, lon);
     }
 
-    let rndMsec = Math.floor(Math.random() * 800) + 200;
+    let rndMsec = Math.floor(Math.random() * 1000) + 200;
 
     Em.run.later(() => {
       this.set('place', location)
       let mapObject = $('#map_area').vectorMap('get', 'mapObject');
       mapObject.addMarker(this.dataIndex, {latLng: [lat, lon], name: location});
+      this.spawnCirclePulse(this.dataIndex, location);
       this.dataIndex++;
-      this.bleep();
+      // this.bleep();
     }, rndMsec);
   },
 
