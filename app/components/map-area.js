@@ -3,9 +3,9 @@ import ENV from '../config/environment'
 
 export default Ember.Component.extend({
   cableService: Ember.inject.service('cable'),
+  geocoder: Ember.inject.service(),
   socketURI: 'ws://localhost:3000/cable',
 
-  nominatimUrl: "http://nominatim.openstreetmap.org/search",
   dataIndex: 0,
   markerWidth: 10,
 
@@ -20,7 +20,7 @@ export default Ember.Component.extend({
     const y = parseInt(markerElement.attr('cy')) + mapOffset.top - this.markerWidth/2;
 
     const $circle = $(`<div class="radar-circle"><div class="radar-circle-content">${location}</div></div>`);
-    const circleWidth = 280;
+    const circleWidth = 220;
 
     $circle.css({top: `${y}px`, left: `${x}px`});
     $circle.animate({
@@ -29,26 +29,21 @@ export default Ember.Component.extend({
         'margin-top': `${-circleWidth/2}px`,
         'margin-left': `${-circleWidth/2}px`,
         'background': 'background: rgba(0,0,255,0.1);'
-      }, 2000, 'easeOutCirc');
+      }, 1700, 'easeOutCirc');
 
     $('body').append($circle);
 
     Em.run.later(() => {
       $circle.fadeOut('slow', () => $circle.remove());
-    }, 2100);
+    }, 1900);
   },
 
-  addMarker(location, lat, lon, saveLocation) {
+  addMarker(location, lat, lon) {
     if (!location || !lat || !lon) {
       return;
     }
 
-    if (saveLocation) {
-      console.log(`Caching location to the server: ${location}`);
-      this.saveLocation(location, lat, lon);
-    }
-
-    let rndMsec = Math.floor(Math.random() * 1000) + 200;
+    let rndMsec =  Math.floor(Math.random() * 1600) + 100
 
     Em.run.later(() => {
       this.set('place', location)
@@ -58,45 +53,6 @@ export default Ember.Component.extend({
       this.dataIndex++;
       // this.bleep();
     }, rndMsec);
-  },
-
-  tryNominatim(location) {
-    console.log(`Trying nominatim: ${location}`);
-    let locationParam = location.replace(/\s+/g, " ").trim().split(" ").join("+");
-    Ember.$.getJSON(this.get('nominatimUrl') + `?format=json&q=${locationParam}`).then((data) => {
-      if (data[0] && data[0].lat && data[0].lon) {
-        this.addMarker(location, data[0].lat, data[0].lon, true);
-      }
-    });
-  },
-
-  tryGoogle(location) {
-    console.log(`Trying google: ${location}`);
-    let geocoder = new google.maps.Geocoder();
-    geocoder.geocode({'address': location}, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK) {
-        let coords = results[0].geometry.location;
-
-        let latitude = coords.H;
-        let longitude = coords.L;
-
-        if (!latitude) {
-          latitude = results[0].geometry.location.lat();
-        }
-
-        if (!longitude) {
-          longitude = results[0].geometry.location.lng();
-        }
-
-        this.addMarker(location, latitude, longitude, true);
-      }
-      else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-        console.log('google over limit, trying nominatim...');
-        this.tryNominatim(location);
-      } else {
-        console.log('google geocode fail: ' + status);
-      }
-    });
   },
 
   bleep() {
@@ -121,16 +77,12 @@ export default Ember.Component.extend({
     let didReceiveMessage = (msg) => {
       if (msg.author_location && msg.latitude && msg.longitude) {
         console.log(`Adding marker from cached location: ${msg.author_location}`);
-        this.addMarker(msg.author_location, msg.latitude, msg.longitude, false)
+        this.addMarker(msg.author_location, msg.latitude, msg.longitude);
       } else {
-        let rndMsec = Math.floor(Math.random() * 2000) + 500;
-        Em.run.later(() => {
-          if (this.dataIndex % 3 == 0) {
-            this.tryNominatim(msg.author_location);
-          } else {
-            this.tryGoogle(msg.author_location);
-          }
-        }, rndMsec);
+        this.get('geocoder').geocode(msg.author_location, true).then((locationData) => {
+          this.saveLocation(locationData.location, locationData.latitude, locationData.longitude);
+          this.addMarker(locationData.location, locationData.latitude, locationData.longitude);
+        })
       }
     }
 
