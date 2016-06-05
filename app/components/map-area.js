@@ -2,15 +2,15 @@ import Ember from 'ember';
 import ENV from '../config/environment'
 
 export default Ember.Component.extend({
+  cableService: Ember.inject.service('cable'),
+  socketURI: 'ws://localhost:3000/cable',
 
-  socketURI: '//localhost:7474/github_broadcast',
   nominatimUrl: "http://nominatim.openstreetmap.org/search",
   dataIndex: 0,
   markerWidth: 10,
 
-  storeLocation(name, latitude, longitude) {
-    const url = ENV.serverUrl + "/store_location";
-    Ember.$.post(url, { name: name, latitude: latitude, longitude: longitude });
+  saveLocation(name, latitude, longitude) {
+    this.subscription.perform("save_location", { name: name, latitude: latitude, longitude: longitude });
   },
 
   spawnCirclePulse(idx, location) {
@@ -20,7 +20,7 @@ export default Ember.Component.extend({
     const y = parseInt(markerElement.attr('cy')) + mapOffset.top - this.markerWidth/2;
 
     const $circle = $(`<div class="radar-circle"><div class="radar-circle-content">${location}</div></div>`);
-    const circleWidth = 300;
+    const circleWidth = 280;
 
     $circle.css({top: `${y}px`, left: `${x}px`});
     $circle.animate({
@@ -34,18 +34,18 @@ export default Ember.Component.extend({
     $('body').append($circle);
 
     Em.run.later(() => {
-      $circle.fadeOut(() => $circle.remove());
+      $circle.fadeOut('slow', () => $circle.remove());
     }, 2100);
   },
 
-  addMarker(location, lat, lon, storeLocation) {
+  addMarker(location, lat, lon, saveLocation) {
     if (!location || !lat || !lon) {
       return;
     }
 
-    if (storeLocation) {
+    if (saveLocation) {
       console.log(`Caching location to the server: ${location}`);
-      this.storeLocation(location, lat, lon);
+      this.saveLocation(location, lat, lon);
     }
 
     let rndMsec = Math.floor(Math.random() * 1000) + 200;
@@ -85,7 +85,7 @@ export default Ember.Component.extend({
         }
 
         if (!longitude) {
-          latitude = results[0].geometry.location.lng();
+          longitude = results[0].geometry.location.lng();
         }
 
         this.addMarker(location, latitude, longitude, true);
@@ -115,7 +115,9 @@ export default Ember.Component.extend({
         }
       }
     });
+  },
 
+  consumeMessages() {
     let didReceiveMessage = (msg) => {
       if (msg.author_location && msg.latitude && msg.longitude) {
         console.log(`Adding marker from cached location: ${msg.author_location}`);
@@ -132,25 +134,15 @@ export default Ember.Component.extend({
       }
     }
 
-    let firehose = new Firehose.Consumer({
-      message: function(msg){
-        didReceiveMessage(msg);
-      },
-      connected: function(){
-        console.log("Great Scotts!! We're connected!");
-      },
-      disconnected: function(){
-        console.log("Well shucks, we're not connected anymore");
-      },
-      error: function(){
-        console.log("Well then, something went horribly wrong.");
-      },
-      uri: this.socketURI
-    }).connect();
+    const consumer = this.get('cableService').createConsumer(this.socketURI);
+    this.subscription = consumer.subscriptions.create("RadarChannel", {
+      received: didReceiveMessage
+    });
   },
 
   didInsertElement() {
     this._super(...arguments);
+    this.consumeMessages();
     this.drawMap();
   }
 });
