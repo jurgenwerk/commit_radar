@@ -4,10 +4,9 @@ import ENV from '../config/environment'
 export default Ember.Component.extend({
   cableService: Ember.inject.service('cable'),
   geocoder: Ember.inject.service(),
-  socketURI: 'ws://localhost:3000/cable',
 
   dataIndex: 0,
-  markerWidth: 10,
+  markerWidth: 6,
 
   saveLocation(name, latitude, longitude) {
     this.subscription.perform("save_location", { name: name, latitude: latitude, longitude: longitude });
@@ -20,7 +19,7 @@ export default Ember.Component.extend({
     const y = parseInt(markerElement.attr('cy')) + mapOffset.top - this.markerWidth/2;
 
     const $circle = $(`<div class="radar-circle"><div class="radar-circle-content">${location}</div></div>`);
-    const circleWidth = 220;
+    const circleWidth = 320;
 
     $circle.css({top: `${y}px`, left: `${x}px`});
     $circle.animate({
@@ -28,14 +27,14 @@ export default Ember.Component.extend({
         'height': `${circleWidth}px`,
         'margin-top': `${-circleWidth/2}px`,
         'margin-left': `${-circleWidth/2}px`,
-        'background': 'background: rgba(0,0,255,0.1);'
-      }, 1700, 'easeOutCirc');
+        'background': 'rgba(255, 92, 0, 0.01)'
+      }, 2000, 'easeOutCirc');
 
     $('body').append($circle);
 
     Em.run.later(() => {
       $circle.fadeOut('slow', () => $circle.remove());
-    }, 1900);
+    }, 2000);
   },
 
   addMarker(location, lat, lon) {
@@ -63,11 +62,24 @@ export default Ember.Component.extend({
   drawMap() {
     this.$('#map_area').vectorMap({
       map: 'world_mill',
-      backgroundColor: '#282C34',
+      backgroundColor: '#fff',
+      zoomOnScroll: false,
       markerStyle: {
         initial: {
-          fill: '#FF0000',
-          stroke: '#4c0000'
+          fill: '#fff',
+          stroke: '#ff5f2e',
+          "stroke-width": 3,
+          r: 4,
+          "fill-opacity": 1,
+          "stroke-opacity": 0.98
+        }
+      },
+      regionStyle: {
+        initial: {
+          stroke: '#a3cfec',
+          fill: '#2b90d9',
+          "stroke-width": 1,
+          "stroke-opacity": 0.1
         }
       }
     });
@@ -86,7 +98,7 @@ export default Ember.Component.extend({
       }
     }
 
-    const consumer = this.get('cableService').createConsumer(this.socketURI);
+    const consumer = this.get('cableService').createConsumer(ENV.socketURI);
     this.subscription = consumer.subscriptions.create("RadarChannel", {
       received: didReceiveMessage
     });
