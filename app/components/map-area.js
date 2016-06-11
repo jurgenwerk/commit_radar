@@ -7,6 +7,9 @@ export default Ember.Component.extend({
 
   dataIndex: 0,
   markerWidth: 6,
+  lastMarkerAddedTimestamp: 0,
+  minimumMilisecondsBetween: 500,
+  addedMarkers: [],
 
   saveLocation(name, latitude, longitude) {
     this.subscription.perform("save_location", { name: name, latitude: latitude, longitude: longitude });
@@ -28,13 +31,10 @@ export default Ember.Component.extend({
         'margin-top': `${-circleWidth/2}px`,
         'margin-left': `${-circleWidth/2}px`,
         'background': 'rgba(255, 92, 0, 0.01)'
-      }, 2000, 'easeOutCirc');
+      }, 2100, 'easeOutCirc');
 
     $('body').append($circle);
-
-    Em.run.later(() => {
-      $circle.fadeOut('slow', () => $circle.remove());
-    }, 2000);
+    $circle.fadeOut('slow', () => $circle.remove());
   },
 
   addMarker(location, lat, lon) {
@@ -42,16 +42,23 @@ export default Ember.Component.extend({
       return;
     }
 
-    let rndMsec =  Math.floor(Math.random() * 1600) + 100
+    let waitFor = 0;
+    const currentTimestamp = Date.now();
+    const timeDiff = currentTimestamp - this.lastMarkerAddedTimestamp;
+
+    if (timeDiff < this.minimumMilisecondsBetween) {
+      waitFor = (this.minimumMilisecondsBetween - timeDiff) + Math.random() * 10000;
+    }
 
     Em.run.later(() => {
       this.set('place', location)
-      let mapObject = $('#map_area').vectorMap('get', 'mapObject');
-      mapObject.addMarker(this.dataIndex, {latLng: [lat, lon], name: location});
+      this.mapObject.addMarker(this.dataIndex, {latLng: [lat, lon], name: location});
       this.spawnCirclePulse(this.dataIndex, location);
+      this.addedMarkers.push([this.dataIndex, Date.now()])
       this.dataIndex++;
+      this.lastMarkerAddedTimestamp = Date.now();
       // this.bleep();
-    }, rndMsec);
+    }, waitFor);
   },
 
   bleep() {
@@ -67,11 +74,11 @@ export default Ember.Component.extend({
       markerStyle: {
         initial: {
           fill: '#fff',
-          stroke: '#ff5f2e',
-          "stroke-width": 3,
-          r: 4,
+          stroke: '#ee5d31',
+          "stroke-width": 4,
+          r: 5,
           "fill-opacity": 1,
-          "stroke-opacity": 0.98
+          "stroke-opacity": 1
         }
       },
       regionStyle: {
@@ -83,6 +90,7 @@ export default Ember.Component.extend({
         }
       }
     });
+    this.mapObject = $('#map_area').vectorMap('get', 'mapObject');
   },
 
   consumeMessages() {
@@ -91,7 +99,8 @@ export default Ember.Component.extend({
         console.log(`Adding marker from cached location: ${msg.author_location}`);
         this.addMarker(msg.author_location, msg.latitude, msg.longitude);
       } else {
-        this.get('geocoder').geocode(msg.author_location, true).then((locationData) => {
+        const tryNominatimFirst = this.dataIndex % 3 == 0;
+        this.get('geocoder').geocode(msg.author_location, tryNominatimFirst).then((locationData) => {
           this.saveLocation(locationData.location, locationData.latitude, locationData.longitude);
           this.addMarker(locationData.location, locationData.latitude, locationData.longitude);
         })
@@ -104,9 +113,43 @@ export default Ember.Component.extend({
     });
   },
 
+  graduallyAgeMarkers() {
+    Ember.run.later(() => {
+      this.ageMarkers();
+      this.graduallyAgeMarkers();
+    }, 7000);
+  },
+
+  ageMarkers() {
+    const currentTime = new Date();
+    this.addedMarkers.forEach((marker) => {
+      const markerIndex = marker[0];
+      const mapMarker = this.mapObject.markers[markerIndex];
+      const currentStrokeOpacity = Math.round(mapMarker.element.config.style.initial['stroke-opacity'] * 100) / 100;
+      const currentFillOpacity = Math.round(mapMarker.element.config.style.initial['stroke-opacity'] * 100) / 100
+      const currentRadius = mapMarker.element.config.style.initial.r;
+
+      if (currentStrokeOpacity > 0.3) {
+        const newStrokeOpacity = currentStrokeOpacity - 0.05;
+        const newFillOpacity = currentFillOpacity - 0.05;
+        mapMarker.element.config.style.initial['stroke-opacity'] = newStrokeOpacity;
+        mapMarker.element.config.style.initial['fill-opacity'] = newFillOpacity;
+        $(`circle[data-index=${markerIndex}]`).attr('stroke-opacity', newStrokeOpacity);
+        $(`circle[data-index=${markerIndex}]`).attr('fill-opacity', newFillOpacity);
+      }
+
+      if (currentStrokeOpacity == 0.7 || currentStrokeOpacity == 0.5) {
+        const newRadius = currentRadius - 1;
+        mapMarker.element.config.style.initial.r = newRadius;
+        $(`circle[data-index=${markerIndex}]`).attr('r', newRadius);
+      }
+    })
+  },
+
   didInsertElement() {
     this._super(...arguments);
     this.consumeMessages();
     this.drawMap();
+    this.graduallyAgeMarkers();
   }
 });
