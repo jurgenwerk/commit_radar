@@ -1,5 +1,4 @@
 body {
-  /*background: #282C34;*/
   color: white;
   margin: 25px;
   font-family: 'Merriweather', serif;
@@ -20,7 +19,7 @@ body {
 .jvectormap-zoomin, .jvectormap-zoomout {
   right: 0;
   left: auto;
-  background: #e67e22;
+  background: #094f90;
   width: 22px;
   height: 17px;
   padding-top: 8px;
@@ -57,7 +56,6 @@ body {
   font-weight: bold;
   text-transform: uppercase;
   overflow: hidden;
-  /*text-overflow: ellipsis;*/
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -78,6 +76,7 @@ footer {
   color: black;
   font-size: 0.7em;
   left: 0;
+  margin-top: 5px;
 }
 
 footer a {
