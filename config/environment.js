@@ -25,7 +25,7 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
-    ENV.serverUrl = "http://localhost:3000"
+    // ENV.socketURI = "ws://107.170.130.44/cable"
     ENV.socketURI = "ws://107.170.130.44/cable"
   }
 
@@ -42,7 +42,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-    ENV.serverUrl = "/"
+    ENV.socketURI = "ws://107.170.130.44/cable"
   }
 
   return ENV;

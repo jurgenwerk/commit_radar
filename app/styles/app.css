@@ -1,17 +1,39 @@
 body {
   /*background: #282C34;*/
   color: white;
-  margin: 0;
+  margin: 25px;
   font-family: 'Merriweather', serif;
 }
 
 #map_area {
-  height: 600px;
   width: 100%;
 }
 
+.title {
+  color: #2c3e50;
+  text-align: center;
+  font-size: 1.5em;
+  margin-left: 15px;
+  margin-bottom: 1.1em;
+}
+
 .jvectormap-zoomin, .jvectormap-zoomout {
-  display: none;
+  right: 0;
+  left: auto;
+  background: #e67e22;
+  width: 22px;
+  height: 17px;
+  padding-top: 8px;
+  margin-right: 8px;
+  opacity: 0.8;
+}
+
+.jvectormap-zoomin:hover, .jvectormap-zoomout:hover {
+  opacity: 1;
+}
+
+.jvectormap-zoomout {
+  margin-top: 15px;
 }
 
 .radar-circle {
@@ -31,11 +53,38 @@ body {
 .radar-circle-content {
   margin: auto;
   color: #fff;
-  font-size: 22px;
+  font-size: 1.2em;
   font-weight: bold;
   text-transform: uppercase;
   overflow: hidden;
-  text-overflow: ellipsis;
+  /*text-overflow: ellipsis;*/
   white-space: nowrap;
   vertical-align: middle;
+}
+
+.author {
+  font-size: 0.5em;
+}
+
+.gh-link {
+  color: #fff;
+}
+
+footer {
+  color: #16a085;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  color: black;
+  font-size: 0.7em;
+  left: 0;
+}
+
+footer a {
+  color: black;
+}
+
+.twitter-follow-button {
+  position: absolute !important;
+  right: 30px;
 }

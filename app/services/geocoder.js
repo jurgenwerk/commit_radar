@@ -44,7 +44,7 @@ export default Ember.Service.extend({
             longitude = results[0].geometry.location.lng();
           }
 
-          resolve({location: location, latitude: latitude, longitude: longitude})
+          resolve({location: location, latitude: latitude, longitude: longitude});
         }
         else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
           console.log('google over limit, trying nominatim...');
