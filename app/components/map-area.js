@@ -97,8 +97,11 @@ export default Ember.Component.extend({
         }
       },
       onMarkerTipShow(event, label, index){
+        const labelParts = label.html().split("&lt;br&gt;");
+        const location = labelParts[0];
+        const author = labelParts[1];
         label.html(
-          label.html().replace("&lt;br&gt;", "<br>")
+          `<div class='commit-location'>${location}</div><div class='commit-author'>${author}</div>`
         );
       }
     });

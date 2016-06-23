@@ -87,3 +87,19 @@ footer a {
   position: absolute !important;
   right: 30px;
 }
+
+.commit-location {
+  font-size: 1.2em;
+  padding: 3px;
+}
+
+.commit-author {
+  padding: 3px;
+  font-size: 0.9em;
+  padding-top: 1px;
+}
+
+.jvectormap-tip {
+  opacity: 0.9;
+  border: 1px solid #ecf0f1;
+}
