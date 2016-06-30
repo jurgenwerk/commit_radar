@@ -10,6 +10,7 @@ export default Ember.Component.extend({
   lastMarkerAddedTimestamp: 0,
   minimumMilisecondsBetween: 500,
   addedMarkers: [],
+  commitsShowing: false,
 
   saveLocation(name, latitude, longitude, author) {
     this.subscription.perform("save_location", { location_name: name, latitude: latitude, longitude: longitude, author: author });
@@ -24,6 +25,8 @@ export default Ember.Component.extend({
     const mapOffset = $('.jvectormap-container svg').offset()
     const x = parseInt(markerElement.attr('cx')) + mapOffset.left - this.markerWidth/2;
     const y = parseInt(markerElement.attr('cy')) + mapOffset.top - this.markerWidth/2;
+
+    $('.middle-stripe').fadeOut('fast');
 
     const $circle =
       $(`<div class="radar-circle">
@@ -93,7 +96,8 @@ export default Ember.Component.extend({
           stroke: '#a3cfec',
           fill: '#2b90d9',
           "stroke-width": 1,
-          "stroke-opacity": 0.1
+          "stroke-opacity": 0.1,
+          "fill-opacity": 0
         }
       },
       onMarkerTipShow(event, label, index){
@@ -106,10 +110,15 @@ export default Ember.Component.extend({
       }
     });
     this.mapObject = $('#map_area').vectorMap('get', 'mapObject');
+    this.countryKeys = Object.keys(this.mapObject.regions);
   },
 
   consumeMessages() {
     let didReceiveMessage = (msg) => {
+      if (!this.commitsShowing) {
+        return;
+      }
+
       if (msg.author_location && msg.latitude && msg.longitude) {
         console.log(`Adding marker from cached location: ${msg.author_location}`);
         this.addMarker(msg.author_location, msg.latitude, msg.longitude, msg.author);
@@ -125,6 +134,23 @@ export default Ember.Component.extend({
     const consumer = this.get('cableService').createConsumer(ENV.socketURI);
     this.subscription = consumer.subscriptions.create("RadarChannel", {
       received: didReceiveMessage
+    });
+  },
+
+  animateMap() {
+    return new Ember.RSVP.Promise((resolve, reject) => {
+      const _animate = () => {
+        Ember.run.later(() => {
+          let key = this.countryKeys.shift()
+          if (key == undefined) {
+            resolve();
+          } else {
+            this.mapObject.regions[key].element.setStyle({ "fill-opacity": 1 });
+            _animate();
+          }
+        }, 30);
+      }
+      _animate();
     });
   },
 
@@ -152,12 +178,6 @@ export default Ember.Component.extend({
         $(`circle[data-index=${markerIndex}]`).attr('stroke-opacity', newStrokeOpacity);
         $(`circle[data-index=${markerIndex}]`).attr('fill-opacity', newFillOpacity);
       }
-
-      // if (currentStrokeOpacity == 0.7 || currentStrokeOpacity == 0.5) {
-      //   const newRadius = currentRadius - 1;
-      //   mapMarker.element.config.style.initial.r = newRadius;
-      //   $(`circle[data-index=${markerIndex}]`).attr('r', newRadius);
-      // }
     })
   },
 
@@ -165,6 +185,10 @@ export default Ember.Component.extend({
     this._super(...arguments);
     this.consumeMessages();
     this.drawMap();
+    this.animateMap().then(() => {
+      $('.middle-stripe-text span').addClass('pulsate');
+      this.commitsShowing = true;
+    });
     this.graduallyAgeMarkers();
   }
 });
