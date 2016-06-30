@@ -9,7 +9,7 @@ body {
 }
 
 .jvectormap-region {
-  transition: fill-opacity 1s;
+  transition: fill-opacity 0.45s;
 }
 
 .title {

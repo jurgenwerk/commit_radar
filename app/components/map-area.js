@@ -148,7 +148,7 @@ export default Ember.Component.extend({
             this.mapObject.regions[key].element.setStyle({ "fill-opacity": 1 });
             _animate();
           }
-        }, 30);
+        }, 17);
       }
       _animate();
     });
