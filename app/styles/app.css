@@ -29,6 +29,7 @@ body {
   padding-top: 8px;
   margin-right: 8px;
   opacity: 0.8;
+  z-index: 1000;
 }
 
 .jvectormap-zoomin:hover, .jvectormap-zoomout:hover {
@@ -44,7 +45,7 @@ body {
   height: 0px;
   margin-top: 0px;
   margin-left: 0px;
-  border: 1px solid rgba(255, 92, 0, 1);;
+  border: 1px solid rgba(255, 92, 0, 1);
   border-radius: 300px;
   background: rgba(255, 92, 0, 0.56);
   opacity: 0.8;
@@ -130,7 +131,13 @@ footer a {
 }
 
 @keyframes pulsate {
-    0% {transform: scale(0.1, 0.1); opacity: 0.0;}
-    50% {opacity: 1.0;}
-    100% {transform: scale(1.2, 1.2); opacity: 0.0;}
+  0% {transform: scale(0.1, 0.1); opacity: 0.0;}
+  50% {opacity: 1.0;}
+  100% {transform: scale(1.2, 1.2); opacity: 0.0;}
+}
+
+@media only screen and (max-device-width: 600px){
+  footer a {
+    display: block;
+  }
 }

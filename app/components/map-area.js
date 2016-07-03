@@ -36,7 +36,11 @@ export default Ember.Component.extend({
              <a href="https://github.com/${author}" target="_blank" class="gh-link">@${author}</a>
            <div>
          </div></div>`);
-    const circleWidth = 260;
+
+    let circleWidth = 260;
+    if (document.documentElement.clientWidth < 700) {
+      circleWidth = 210;
+    }
 
     $circle.css({top: `${y}px`, left: `${x}px`});
     $circle.animate({
