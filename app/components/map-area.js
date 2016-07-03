@@ -158,7 +158,7 @@ export default Ember.Component.extend({
     Ember.run.later(() => {
       this.ageMarkers();
       this.graduallyAgeMarkers();
-    }, 7000);
+    }, 5500);
   },
 
   ageMarkers() {
