@@ -60,13 +60,7 @@ export default Ember.Component.extend({
       return;
     }
 
-    let waitFor = 0;
-    const currentTimestamp = Date.now();
-    const timeDiff = currentTimestamp - this.lastMarkerAddedTimestamp;
-
-    if (timeDiff < this.minimumMilisecondsBetween) {
-      waitFor = (this.minimumMilisecondsBetween - timeDiff) + Math.random() * 10000;
-    }
+    let waitFor = Math.random() * 5000;
 
     Em.run.later(() => {
       this.set('place', location);
