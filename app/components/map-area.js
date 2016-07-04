@@ -37,9 +37,9 @@ export default Ember.Component.extend({
            <div>
          </div></div>`);
 
-    let circleWidth = 260;
+    let circleWidth = 255;
     if (document.documentElement.clientWidth < 700) {
-      circleWidth = 180;
+      circleWidth = 170;
     }
 
     $circle.css({top: `${y}px`, left: `${x}px`});
@@ -49,7 +49,7 @@ export default Ember.Component.extend({
         'margin-top': `${-circleWidth/2}px`,
         'margin-left': `${-circleWidth/2}px`,
         'background': 'rgba(255, 92, 0, 0.01)'
-      }, 2100, 'easeOutCirc');
+      }, 1900, 'easeOutCirc');
 
     $('body').append($circle);
     $circle.fadeOut('slow', () => $circle.remove());
