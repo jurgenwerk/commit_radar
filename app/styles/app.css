@@ -136,8 +136,24 @@ footer a {
   100% {transform: scale(1.2, 1.2); opacity: 0.0;}
 }
 
-@media only screen and (max-device-width: 600px){
+@media only screen and (max-device-width: 700px){
   footer a {
     display: block;
+  }
+
+  .twitter-follow-button {
+    display: none;
+  }
+
+  .commit-location {
+    font-size: 1em;
+  }
+
+  .commit-author {
+    font-size: 0.7em;
+  }
+
+  .radar-circle-content {
+    font-size: 1em;
   }
 }

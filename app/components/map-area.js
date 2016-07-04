@@ -39,7 +39,7 @@ export default Ember.Component.extend({
 
     let circleWidth = 260;
     if (document.documentElement.clientWidth < 700) {
-      circleWidth = 210;
+      circleWidth = 180;
     }
 
     $circle.css({top: `${y}px`, left: `${x}px`});
@@ -124,11 +124,12 @@ export default Ember.Component.extend({
       }
 
       if (msg.author_location && msg.latitude && msg.longitude) {
-        console.log(`Adding marker from cached location: ${msg.author_location}`);
+        Ember.Logger.info(`Adding marker from cached location: ${msg.author_location}`);
         this.addMarker(msg.author_location, msg.latitude, msg.longitude, msg.author);
       } else {
-        const tryNominatimFirst = this.dataIndex % 3 == 0;
+        const tryNominatimFirst = this.dataIndex % 2 == 0;
         this.get('geocoder').geocode(msg.author_location, tryNominatimFirst).then((locationData) => {
+          Ember.Logger.info(`Resolved ${locationData.location} ${locationData.latitude} ${locationData.longitude}`);
           this.saveLocation(locationData.location, locationData.latitude, locationData.longitude, msg.author);
           this.addMarker(locationData.location, locationData.latitude, locationData.longitude, msg.author);
         })
