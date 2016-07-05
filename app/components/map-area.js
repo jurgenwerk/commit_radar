@@ -7,8 +7,6 @@ export default Ember.Component.extend({
 
   dataIndex: 0,
   markerWidth: 6,
-  lastMarkerAddedTimestamp: 0,
-  minimumMilisecondsBetween: 500,
   addedMarkers: [],
   commitsShowing: false,
 
@@ -69,7 +67,6 @@ export default Ember.Component.extend({
       this.spawnCirclePulse(this.dataIndex, location, author);
       this.addedMarkers.push([this.dataIndex, Date.now()]);
       this.dataIndex++;
-      this.lastMarkerAddedTimestamp = Date.now();
     }, waitFor);
   },
 
@@ -137,17 +134,17 @@ export default Ember.Component.extend({
   },
 
   animateMap() {
-    return new Ember.RSVP.Promise((resolve, reject) => {
+    return new Ember.RSVP.Promise((resolve) => {
       const _animate = () => {
         Ember.run.later(() => {
-          let key = this.countryKeys.shift()
+          let key = this.countryKeys.shift();
           if (key == undefined) {
             resolve();
           } else {
             this.mapObject.regions[key].element.setStyle({ "fill-opacity": 1 });
             _animate();
           }
-        }, 17);
+        }, 10);
       }
       _animate();
     });

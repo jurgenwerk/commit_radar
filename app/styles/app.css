@@ -10,14 +10,15 @@ body {
 
 .jvectormap-region {
   transition: fill-opacity 0.45s;
+  -moz-transition: fill-opacity 0.1s;
 }
 
 .title {
   color: #2c3e50;
   text-align: center;
-  font-size: 1.4em;
+  font-size: 1.3em;
   margin-left: 15px;
-  margin-bottom: 1.1em;
+  margin-bottom: 1.4em;
 }
 
 .jvectormap-zoomin, .jvectormap-zoomout {
