@@ -15,7 +15,7 @@ export default Ember.Component.extend({
   },
 
   truncate(v, n) {
-    return (v.length > n) ? v.substr(0, n-1) + '&hellip;' : v;
+    return (v.length > n) ? v.substr(0, n - 1) + '&hellip;' : v;
   },
 
   spawnCirclePulse(idx, location, author) {
@@ -47,10 +47,10 @@ export default Ember.Component.extend({
         'margin-top': `${-circleWidth/2}px`,
         'margin-left': `${-circleWidth/2}px`,
         'background': 'rgba(255, 92, 0, 0.01)'
-      }, 1900, 'easeOutCirc');
+      }, 1200, 'easeOutCirc');
 
     $('body').append($circle);
-    $circle.fadeOut('slow', () => $circle.remove());
+    $circle.fadeOut('normal', () => $circle.remove());
   },
 
   addMarker(location, lat, lon, author) {
@@ -58,7 +58,11 @@ export default Ember.Component.extend({
       return;
     }
 
-    let waitFor = Math.random() * 5000;
+    // To distribute more evenly
+    let waitFor = Math.random() * 3000;
+    if (this.dataIndex > 5) {
+      waitFor = Math.random() * 8000;
+    }
 
     Em.run.later(() => {
       this.set('place', location);
