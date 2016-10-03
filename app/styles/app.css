@@ -87,8 +87,9 @@ footer {
 }
 
 footer a {
-  font-size: 1.3em;
+  font-size: 1.5em;
   color: black;
+  letter-spacing: 1.6px;
 }
 
 .twitter-follow-button {
